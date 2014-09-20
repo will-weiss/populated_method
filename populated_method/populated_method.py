@@ -19,14 +19,16 @@ class populated_method(object):
         self.keywords = dict(keywords.items() + self.keywords.items())
     
     def __call__(self, *args, **keywords):
-        args_filled = []
+        filled_args = []
         keywords = dict(self.keywords.items() + keywords.items())
         args = list(self.args + args)
         for varname in inspect.getargspec(self.func).args:
             try:
-                args_filled.append(keywords.pop(varname))
+                filled_args.append(keywords.pop(varname))
             except KeyError:
-                if len(args) > 0:
-                    args_filled.append(args.pop(0))
-        args_filled = args_filled + args
-        return self.func(*args_filled, **keywords)
+                try:
+                    filled_args.append(args.pop(0))
+                except IndexError:
+                    filled_args.append(None)
+        filled_args = filled_args + args
+        return self.func(*filled_args, **keywords)
